@@ -157,6 +157,11 @@ header {
     background-color: #c0c0c0;
 }
 
+.dropdownselect:hover {
+    background-color: #020B87; 
+    color: white;   
+}
+
 .start {
     background-color: #c0c0c0;
     border-style: solid;
@@ -176,6 +181,43 @@ header {
     line-height: 18px;
     width: fit-content;
     height: 24px;
+}
+.start-test {
+    background-color: #c0c0c0;
+    border: 2px solid transparent; 
+    min-width: fit-content;
+    padding-right: 4px;
+    padding-top: 2px;
+    padding-left: 3px;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    font-size: small;
+    margin-left: 2px;
+    line-height: 18px;
+    width: fit-content;
+    height: 24px;
+}
+
+.start-test:hover{
+    width:100px;
+    border-style: solid;
+    border-width: 2px;
+    border-color: #404040;
+    border-top-color: #EFEFEF;
+    border-left-color: #EFEFEF;
+}
+.start-test:active {
+    border-left-color:#404040;
+    border-top-color: #404040;
+    border-bottom-color: #EFEFEF;
+    border-right-color: #EFEFEF;
+}
+.start-test:focus {
+    border-left-color:#404040;
+    border-top-color: #404040;
+    border-bottom-color: #EFEFEF;
+    border-right-color: #EFEFEF;
 }
 
 .smile {
@@ -302,6 +344,10 @@ p {
 
 .explorer-header {
     margin-left: 14px;
+}
+
+.explorer-header-test {
+    
 }
 
 .explorer-tool-icon {

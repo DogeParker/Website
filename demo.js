@@ -1,11 +1,11 @@
+const supabaseUrl = 'https://kypjarkbeicqbhdvxhwb.supabase.co/rest/v1/';
+const supabaseKey = 'sb_publishable_sKmwvtuCJGaCp_5KCyCQfQ_xyIKzEco';
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
 function initMinesweeper(windowEl) {
     const gridContainer = windowEl.querySelector('#minegrid');
-    // all your tile-building, mine_matrix setup, etc. goes here
-    // using windowEl.querySelector() instead of document.getElementById()
-    
-    // start of minesweeper
-    // dimension is both height and width of minesweeper tiles 
-    let dimension = 8
+    // dimension is both height and width of minesweeper tiles will need modification for advanced game size
+    let dimension = 9
     // number of current flags placed on board
     let flags = 0;
     // number of current tiles revealed on board
@@ -16,7 +16,7 @@ function initMinesweeper(windowEl) {
     let timerInterval = null;
     let seconds = 0;
     var mine_matrix = Array.from({ length: dimension }, () => Array(dimension).fill(null));
-
+    //chording
     function chordCheck(i, j) {
         //rewrote chord check
         let count = 0;
@@ -31,8 +31,7 @@ function initMinesweeper(windowEl) {
             }
         }
         
-        console.log(`Flags: ${count}, Expected: ${mine_matrix[i][j]}, Match: ${count == mine_matrix[i][j]}`);
-        if(count == mine_matrix[i][j]) {
+        if (count == mine_matrix[i][j]) {
             for (let dx = -1; dx <= 1; dx++) {
                 for (let dy = -1; dy <= 1; dy++) {
                     if (dx === 0 && dy === 0) continue;
@@ -45,7 +44,8 @@ function initMinesweeper(windowEl) {
             }
         }
     }
-
+    //is run to update flags after right click and game resets, is run perhaps one or two too many times,
+    //however function is so tiny that performance losses are negligable
     function updateFlags() {
         let digit1 = '';
         let digit2 = '';
@@ -474,8 +474,8 @@ updateClock(); // run once on load
 
 document.querySelectorAll('.window-98').forEach(initWindow);
 
-// it may be more efficient to store the instance of the window and almost definitely is more efficient to store the desktop icon 
-// instance as the icons are static and will never become null, thus making one call inside the constructor would save having
+// it may be more efficient to store the instance of the window, and almost definitely is more efficient to store the desktop icon 
+// instance as the icons are static and will never become null, thus making one call inside the constructor would save time
 
 // The Window class stores the names of the html classes related to each window and the method that is called when resolving 
 // a dblclick event on a desktop icon
@@ -508,7 +508,7 @@ class Window {
     // static method that will create a window and taskbar instance of a given window type, this method is called through an eventlistener
     // on the desktopApp class of divs, pulls classes from WindowList for templates and for checking if there are
     // already opened windows of a given type... nix that just remove the desktopInstance param, its completely unneccesary,
-    // check window for minesweeper check instead
+    // check window instance for minesweeper check instead
 
     doubleClickHandler(desktopApp, filename) {
         console.log('existing window?', document.querySelector(this._windowInstance));
