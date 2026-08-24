@@ -2,6 +2,36 @@ const supabaseUrl = 'https://kypjarkbeicqbhdvxhwb.supabase.co';
 const supabaseKey = 'sb_publishable_sKmwvtuCJGaCp_5KCyCQfQ_xyIKzEco';
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+//run call to access leaderboard once on startup and store in array
+
+const leaderboard = Array(5);
+
+async function loadLeaderboard() {
+    const { data, error } = await supabaseClient
+        .from('leaderboard')
+        .select('*')
+        .eq('very_important_key', 'k3ZOhsePr3C6wtqYJqsl9w==')
+        .order('time_seconds', { ascending: true })
+        .limit(5);
+
+    if (error) {
+        console.error('Failed to load leaderboard:', error);
+        return;
+    }
+
+    for (let i = 0; i < 5; i++) {
+        const entry = data?.[i];
+        console.log(`Entry ${i}:`, entry);
+        let nme = ''
+        if (!entry.name || entry.name == '') {
+            nme = 'nul';
+        } else nme = entry.name;
+        console.log(`${nme} ${entry.time_seconds ?? '---'}s`);
+        leaderboard[i] = `${nme} ${entry.time_seconds ?? '---'}s`;
+    }
+}
+loadLeaderboard()
+
 function initMinesweeper(windowEl) {
     const gridContainer = windowEl.querySelector('#minegrid');
     let pendingHeartbeats = 0;
@@ -295,39 +325,6 @@ function initMinesweeper(windowEl) {
         }
     }
 
-    async function loadLeaderboard() {
-        const { data, error } = await supabaseClient
-            .from('leaderboard')
-            .select('*')
-            .eq('very_important_key', 'k3ZOhsePr3C6wtqYJqsl9w==')
-            .order('time_seconds', { ascending: true })
-            .limit(5);
-
-        if (error) {
-            console.error('Failed to load leaderboard:', error);
-            return;
-        }
-
-        console.log('Leaderboard data:', data);
-
-        for (let i = 0; i < 5; i++) {
-            const slot = windowEl.querySelector(`#leader${i + 1}`);
-            if (!slot) continue;
-
-            const entry = data?.[i];
-
-            console.log(`Entry ${i}:`, entry);
-            let nme = ''
-            if (entry.name == '') {
-                nme = 'nul';
-            } else nme = entry.name;
-
-            slot.textContent = entry
-                ? `${nme} ${entry.time_seconds ?? '---'}s`
-                : '---';
-        }
-    }
-
     // tiles surrounding check code is used twice
     updateFlags();
     for (let i = 0; i < dimension; i++) {
@@ -369,7 +366,11 @@ function initMinesweeper(windowEl) {
         }
     }
 
-    loadLeaderboard();
+    console.log(leaderboard);
+    for (let i=0; i<leaderboard.length; i++) {
+        const slot = windowEl.querySelector(`#leader${i + 1}`);
+        slot.textContent = leaderboard[i];
+    }
 
     for (let i=0; i<10; i++) {
         let icon = Math.floor(Math.random() * (dimension*dimension));

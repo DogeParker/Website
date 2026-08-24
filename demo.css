@@ -310,13 +310,20 @@ header {
 	height: 250px;
 	background: #384761;
 }
-input[type=text] {
-	font-family: 'Roboto Mono';
-	width: 115px;
+input {
+    font-family: 'MSSansClone';
+	width: 100%;
 	margin-top: 5px;
 	padding: 3px;
-	border-radius: 5px;
+	border-width: 1px;
 	border: inset;
+    border-left-color:#404040;
+    border-top-color: #404040;
+    border-bottom-color: #EFEFEF;
+    border-right-color: #EFEFEF;
+}
+input::placeholder {
+    font-family: 'MSSansClone';
 }
 h1 {
 	font-size: 50px;
