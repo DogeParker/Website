@@ -9,17 +9,24 @@
 
 <!--Important fixes:
         1. Desktop icons should appear selected when clicked on once
-        DONE -- 2. When dragging windows, images and text should not be highlighted
+        2. MIGRATE ENTIRE MINESWEEPER TILEMAP GENERATION TO BACKEND
+            also make sure to clear sessions after they are sure not to be needed, it gets very messy very fast
         3. Entire taskbar should have less left margin, for ref look at 
         98js site
         4. The amount of inline css styling in this document severely hampers
-        readability ...tru
+        readability ...try reducing it
         DONE (mamdani ahh fix, bc there was jus css styling that changed the padding on click) 
         --5. Pressing start makes taskbar shift to right, as it has 4 seperate times so far in this project
         6. Grey out max/min on minesweeper
-        7. Make the explorer header things clickable and have dropdown menus
-        8. Add explorer headers to minesweeper
-        9. 
+        DONE -- 7. Make the explorer header things allowed to be clicked
+        DONE -- 8. Add explorer headers to minesweeper
+        DONE -- 9. Make dropdown for game a template
+        DONE -- 10. Apply it when a click on the menu div is handled
+        DONE -- 11. Also make a property of div which holds it on active like on the other website
+        DONE -- 12. Add name box on leaderboard
+        DONE -- 13. Add IDed text fields for top 5
+        14. Make clicking on leaderboard toggle it on and off
+
 -->
 
 <style>
@@ -75,41 +82,43 @@
             </div>
 
             <!--windows-->
-            <div class="window-98" id="infoWindow" style="width: 150px; height: 110px; position: absolute; top: 200px; left: 100px; display: flex; flex-direction: column;">
-                <div class="dropdownselect" style="width:100%; height: 20px; font-size:small; display: flex; align-items: center;" tabindex="0">
-                    <div class="explorer-header-test" style="margin-left:22px; margin-top: 1px; margin-bottom: 1px;">
-                    <u>N</u>ew
+            <template id="game-dropdown-template">
+                <div class="window-98 gameDropdown" id="infoWindow" style="width: 150px; height: 110px; position: absolute; top: 46px; left: 2px; display: flex; flex-direction: column;">
+                    <div class="dropdownselect" tabindex="0">
+                        <div class="explorer-header-test newMinesweeper" style="margin-left:22px; margin-top: 1px; margin-bottom: 1px;">
+                        <u>N</u>ew
+                        </div>
+                    </div>
+                    <div class="verticalSeparatorWrapper">
+                        <div class="half2" style="width: 97%; height: 1px;"></div>
+                        <div class="half1" style="width: 97%; height: 1px;"></div>
+                    </div>
+                    <div class="dropdownselect" tabindex="0">
+                        <div class="explorer-header-test beginnerMinesweeper">
+                        <u>B</u>eginner
+                        </div>
+                    </div>
+                    <div class="dropdownselect" tabindex="0">
+                        <div class="explorer-header-test intermediateMinesweeper">
+                        <u>I</u>ntermediate
+                        </div>
+                    </div>
+                    <div class="dropdownselect" tabindex="0">
+                        <div class="explorer-header-test expertMinesweeper">
+                        <u>E</u>xpert
+                        </div>
+                    </div>
+                    <div class="verticalSeparatorWrapper">
+                        <div class="half2" style="width: 97%; height: 1px;"></div>
+                        <div class="half1" style="width: 97%; height: 1px;"></div>
+                    </div>
+                    <div class="dropdownselect" tabindex="0">
+                        <div class="explorer-header-test leaderboardMinesweeper">
+                        <u>L</u>eaderboard
+                        </div>
                     </div>
                 </div>
-                <div style="margin-top: 2px; margin-bottom: 2px; width: 100%; display: flex; flex-direction: column; align-items: center;">
-                    <div class="half2" style="width: 97%; height: 1px;"></div>
-                    <div class="half1" style="width: 97%; height: 1px;"></div>
-                </div>
-                <div class="dropdownselect" style="width:100%; height: 20px; font-size:small; display: flex; align-items: center;" tabindex="0">
-                    <div class="explorer-header-test" style="margin-left:22px; margin-top: 1px; margin-bottom: 1px;">
-                    <u>B</u>eginner
-                    </div>
-                </div>
-                <div class="dropdownselect" style="width:100%; height: 20px; font-size:small; display: flex; align-items: center;" tabindex="0">
-                    <div class="explorer-header-test" style="margin-left:22px; margin-top: 1px; margin-bottom: 1px;">
-                    <u>I</u>ntermediate
-                    </div>
-                </div>
-                <div class="dropdownselect" style="width:100%; height: 20px; font-size:small; display: flex; align-items: center;" tabindex="0">
-                    <div class="explorer-header-test" style="margin-left:22px; margin-top: 1px; margin-bottom: 1px;">
-                    <u>E</u>xpert
-                    </div>
-                </div>
-                <div style="margin-top: 2px; margin-bottom: 2px; width: 100%; display: flex; flex-direction: column; align-items: center;">
-                    <div class="half2" style="width: 97%; height: 1px;"></div>
-                    <div class="half1" style="width: 97%; height: 1px;"></div>
-                </div>
-                <div class="dropdownselect" style="width:100%; height: 20px; font-size:small; display: flex; align-items: center;" tabindex="0">
-                    <div class="explorer-header-test" style="margin-left:22px; margin-top: 1px; margin-bottom: 1px;">
-                    <u>L</u>eaderboard
-                    </div>
-                </div>
-            </div>
+            </template>
             <!--About window-->
             <template id="about-template">
                 <div class="window-98" id="infoWindow" style="width: 320px; height: 170px; position: absolute; top: 200px; left: 100px; display: flex; flex-direction: column;">
@@ -322,7 +331,7 @@
             <!--Minesweeper-->
 
             <template id="minesweeper-template">
-                <div class="window-98" id="minesweeperWindow" style="width: 260px; height: 368px; position: absolute; top: 50px; left: 470px; display: flex; flex-direction: column;">
+                <div class="window-98" id="minesweeperWindow" style="width: 380px; height: 368px; position: absolute; top: 50px; left: 470px; display: flex; flex-direction: column;">
                     <div class="window-header">
                         <img src="media/mine.png" class="icon" style="height: 20px; width: 20px; margin-left: 0; margin-right: 2px;">
                         Minesweeper
@@ -339,37 +348,67 @@
                         </div>
                     </div>
                     <div class="explorer-bar" style="margin-left: -8px; height:24px">
-                        <div class="start-test" style="width:20px;margin-left:10px" tabindex="0">
-                            <div class="explorer-header-test">
+                        <div class="start-test gameC" style="width:20px;margin-left:10px" tabindex="0">
+                            <div class="explorer-header-test" style="margin-left: 0px;">
                             <u>G</u>ame
                             </div>
                         </div>
                         <div class="start-test" style="width:20px;margin-left:0px" tabindex="0">
-                            <div class="explorer-header-test">
+                            <div class="explorer-header-test" style="margin-left: 0px;">
                             <u>H</u>elp
                             </div>
                         </div>
                     </div>
-                    <div class="window-98" style="border-width: 4px; margin:4px; height: 100%; width: auto; display: flex; flex: 1; flex-direction: column; padding:4px; margin-top: 0px;">
-                        <div class="window-98" style="border-color: #404040; border-bottom-color: #EFEFEF; border-right-color: #EFEFEF; border-width: 4px; margin:4px; height: 55px; width: auto; display: flex; align-items: center;">
-                            <div style="height: 37px; display: flex; float: left; margin-left: 7px;">
-                                <img src="media/mine-time0.png" id="flags1">
-                                <img src="media/mine-time0.png" id="flags2"> 
-                                <img src="media/mine-time0.png" id="flags3"> 
+                    <div style="display: flex; ">
+                        <div class="window-98" style="border-width: 4px; margin:4px; height: 100%; width: auto; display: flex; flex: 1; flex-direction: column; padding:4px; margin-top: 0px;">
+                            <div class="window-98" style="border-color: #404040; border-bottom-color: #EFEFEF; border-right-color: #EFEFEF; border-width: 4px; margin:4px; height: 55px; width: auto; display: flex; align-items: center;">
+                                <div style="height: 37px; display: flex; float: left; margin-left: 7px;">
+                                    <img src="media/mine-time0.png" id="flags1">
+                                    <img src="media/mine-time0.png" id="flags2"> 
+                                    <img src="media/mine-time0.png" id="flags3"> 
+                                </div>
+                                <div style="display: flex; flex:1; align-content: center; justify-content: center;">
+                                    <button class="start smile" style="margin:7px; height: 40px; display: flex; aspect-ratio: 1; width: auto;">
+                                        <img src="media/play.png" id='dude' alt="Smiley" class="mimg">
+                                    </button>
+                                </div>
+                                <div style="height: 37px; display: flex; float:inline-end; margin-right: 7px;">
+                                    <img src="media/mine-time0.png" id="timer1">
+                                    <img src="media/mine-time0.png" id="timer2"> 
+                                    <img src="media/mine-time0.png" id="timer3"> 
+                                </div>
                             </div>
-                            <div style="display: flex; flex:1; align-content: center; justify-content: center;">
-                                <button class="start smile" style="margin:7px; height: 40px; display: flex; aspect-ratio: 1; width: auto;">
-                                    <img src="media/play.png" id='dude' alt="Smiley" class="mimg">
-                                </button>
-                            </div>
-                            <div style="height: 37px; display: flex; float:inline-end; margin-right: 7px;">
-                                <img src="media/mine-time0.png" id="timer1">
-                                <img src="media/mine-time0.png" id="timer2"> 
-                                <img src="media/mine-time0.png" id="timer3"> 
+                            <div class="window-98" id="minegrid" style="flex-wrap: wrap; border-color: #404040; border-bottom-color: #EFEFEF; border-right-color: #EFEFEF;border-width: 4px; margin:4px; width: auto; display: flex; height: auto;">
+                                
                             </div>
                         </div>
-                        <div class="window-98" id="minegrid" style="flex-wrap: wrap; border-color: #404040; border-bottom-color: #EFEFEF; border-right-color: #EFEFEF;border-width: 4px; margin:4px; width: auto; display: flex; height: auto;">
-                            
+                        <div class="window-98" style="border-width: 2px; margin:4px; height: 100%; width: 110px; display: flex;  flex-direction: column; padding:4px; margin-top: 0px;">
+                            <div style="width:100%; height: 20px; font-size:small; display: flex; align-items: center;" tabindex="0">
+                                <div class="explorer-header-test" id="leader1" style="margin-top: 1px; margin-bottom: 1px; margin-left: 0px;">
+                                
+                                </div>
+                            </div>
+                            <div style="width:100%; height: 20px; font-size:small; display: flex; align-items: center;" tabindex="0">
+                                <div class="explorer-header-test" id="leader2" style="margin-top: 1px; margin-bottom: 1px; margin-left: 0px;">
+                                
+                                </div>
+                            </div>
+                            <div style="width:100%; height: 20px; font-size:small; display: flex; align-items: center;" tabindex="0">
+                                <div class="explorer-header-test" id="leader3" style="margin-top: 1px; margin-bottom: 1px; margin-left: 0px;">
+                                
+                                </div>
+                            </div>
+                            <div style="width:100%; height: 20px; font-size:small; display: flex; align-items: center;" tabindex="0">
+                                <div class="explorer-header-test" id="leader4" style="margin-top: 1px; margin-bottom: 1px; margin-left: 0px;">
+                                
+                                </div>
+                            </div>
+                            <div style="width:100%; height: 20px; font-size:small; display: flex; align-items: center;" tabindex="0">
+                                <div class="explorer-header-test" id="leader5" style="margin-top: 1px; margin-bottom: 1px; margin-left: 0px;">
+                                
+                                </div>
+                            </div>
+                            <input id="nameInput" maxlength="3" style="margin-top: auto;" placeholder="Enter Name"></input>
                         </div>
                     </div>
                 </div>

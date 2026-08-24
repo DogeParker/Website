@@ -213,11 +213,34 @@ header {
     border-bottom-color: #EFEFEF;
     border-right-color: #EFEFEF;
 }
+.start-test.active {
+    border-left-color:#404040;
+    border-top-color: #404040;
+    border-bottom-color: #EFEFEF;
+    border-right-color: #EFEFEF;
+}
 .start-test:focus {
     border-left-color:#404040;
     border-top-color: #404040;
     border-bottom-color: #EFEFEF;
     border-right-color: #EFEFEF;
+}
+
+.dropdownselect {
+    width: 100%;
+    height: 20px; 
+    font-size: small;
+    display: flex;
+    align-items: center;
+}
+
+.verticalSeparatorWrapper {
+    margin-top: 2px;
+    margin-bottom: 2px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .smile {
@@ -347,7 +370,9 @@ p {
 }
 
 .explorer-header-test {
-    
+    margin-left:22px;
+    margin-top: 1px;
+    margin-bottom: 1px;
 }
 
 .explorer-tool-icon {

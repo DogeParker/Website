@@ -1,11 +1,15 @@
-const supabaseUrl = 'https://kypjarkbeicqbhdvxhwb.supabase.co/rest/v1/';
+const supabaseUrl = 'https://kypjarkbeicqbhdvxhwb.supabase.co';
 const supabaseKey = 'sb_publishable_sKmwvtuCJGaCp_5KCyCQfQ_xyIKzEco';
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
 function initMinesweeper(windowEl) {
     const gridContainer = windowEl.querySelector('#minegrid');
+    let pendingHeartbeats = 0;
+    // 
+    let difficulty = "Beginner";
+    let currentSessionId = null;
     // dimension is both height and width of minesweeper tiles will need modification for advanced game size
-    let dimension = 9
+    let dimension = 9;
     // number of current flags placed on board
     let flags = 0;
     // number of current tiles revealed on board
@@ -179,6 +183,20 @@ function initMinesweeper(windowEl) {
         }
         if (tilesRevealed == 0) {
             startTimer();
+
+            fetch('https://kypjarkbeicqbhdvxhwb.supabase.co/functions/v1/start-session', {
+                method: 'POST',
+                headers: {
+                    'apiKey': 'sb_publishable_sKmwvtuCJGaCp_5KCyCQfQ_xyIKzEco',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ difficulty: 'beginner' })
+            })
+            .then(res => res.json())
+            .then(data => {
+                currentSessionId = data.sessionId;
+            })
+            .catch(err => console.error('Failed to start session:', err));
         }
 
         const tile = tiles[row][col];
@@ -199,11 +217,33 @@ function initMinesweeper(windowEl) {
         }
 
         tilesRevealed++;
+        if (tilesRevealed % 5 === 0 && currentSessionId) {
+            fetch('https://kypjarkbeicqbhdvxhwb.supabase.co/functions/v1/heartbeat', {
+                method: 'POST',
+                headers: { 'apiKey': 'sb_publishable_sKmwvtuCJGaCp_5KCyCQfQ_xyIKzEco', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId: currentSessionId })
+            });
+        }
 
         if (tilesRevealed === dimension * dimension - 10) {
             windowEl.querySelector('#dude').src = 'media/win.png'
             gameover = true;
             stopTimer();
+            const someName = windowEl.querySelector('#nameInput').value;
+
+            fetch('https://kypjarkbeicqbhdvxhwb.supabase.co/functions/v1/submit-score', {
+                method: 'POST',
+                headers: {
+                    'apiKey': 'sb_publishable_sKmwvtuCJGaCp_5KCyCQfQ_xyIKzEco',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ sessionId: currentSessionId, name: someName })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.error) console.error('Submit failed:', result.error);
+                else console.log('Score submitted:', result.time);
+            });
         }
 
         if (value > 0) {
@@ -255,6 +295,39 @@ function initMinesweeper(windowEl) {
         }
     }
 
+    async function loadLeaderboard() {
+        const { data, error } = await supabaseClient
+            .from('leaderboard')
+            .select('*')
+            .eq('very_important_key', 'k3ZOhsePr3C6wtqYJqsl9w==')
+            .order('time_seconds', { ascending: true })
+            .limit(5);
+
+        if (error) {
+            console.error('Failed to load leaderboard:', error);
+            return;
+        }
+
+        console.log('Leaderboard data:', data);
+
+        for (let i = 0; i < 5; i++) {
+            const slot = windowEl.querySelector(`#leader${i + 1}`);
+            if (!slot) continue;
+
+            const entry = data?.[i];
+
+            console.log(`Entry ${i}:`, entry);
+            let nme = ''
+            if (entry.name == '') {
+                nme = 'nul';
+            } else nme = entry.name;
+
+            slot.textContent = entry
+                ? `${nme} ${entry.time_seconds ?? '---'}s`
+                : '---';
+        }
+    }
+
     // tiles surrounding check code is used twice
     updateFlags();
     for (let i = 0; i < dimension; i++) {
@@ -296,6 +369,8 @@ function initMinesweeper(windowEl) {
         }
     }
 
+    loadLeaderboard();
+
     for (let i=0; i<10; i++) {
         let icon = Math.floor(Math.random() * (dimension*dimension));
         while (mine_matrix[Math.floor(icon/dimension)][icon%dimension] != null) {
@@ -327,7 +402,25 @@ function initMinesweeper(windowEl) {
         resetGame();
         updateFlags();
     });
-    console.log(gridContainer);
+    
+
+    document.querySelectorAll('.gameC').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const minesweeperWindow = e.target.closest('.window-98'); // the parent window
+            const existing = minesweeperWindow.querySelector('.gameDropdown');
+
+            if (existing) {
+                existing.remove(); // toggle off if already open
+                btn.classList.remove('active');
+                return;
+            }
+
+            const template = document.getElementById('game-dropdown-template');
+            const clone = template.content.cloneNode(true);
+            minesweeperWindow.appendChild(clone);
+            btn.classList.add('active');
+        });
+    });
 }
 
 let topZ = 10;
@@ -469,10 +562,23 @@ function initNotepad(win) {
     });
 }
 
+document.querySelectorAll('.window-98').forEach(initWindow);
+
+document.addEventListener('pointerdown', e => {
+    const dropdown = document.querySelector('.gameDropdown');
+    if (!dropdown) return; // nothing is open
+
+    const clickedInsideDropdown = dropdown.contains(e.target);
+    const clickedButton = e.target.closest('.gameC');
+
+    if (!clickedInsideDropdown && !clickedButton) {
+        dropdown.remove();
+        document.querySelector('.gameC.active')?.classList.remove('active');
+    }
+});
+
 setInterval(updateClock, 1000);
 updateClock(); // run once on load
-
-document.querySelectorAll('.window-98').forEach(initWindow);
 
 // it may be more efficient to store the instance of the window, and almost definitely is more efficient to store the desktop icon 
 // instance as the icons are static and will never become null, thus making one call inside the constructor would save time
